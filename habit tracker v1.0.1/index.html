@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Habit Tracker + Calendar</title>
+    <link rel="manifest" href="/habit-tracker/manifest.json">
+    <meta name="theme-color" content="#2196F3">
+    <style>
+        /* ============================================
+           DESIGN SYSTEM & CSS VARIABLES
+           ============================================ */
+        :root {
+            --color-primary: #2196F3;
+            --color-primary-hover: #0b7dda;
+            --color-success: #4CAF50;
+            --color-danger: #f44336;
+            --color-warning: #ff9800;
+            --color-bg-primary: #f5f5f5;
+            --color-bg-secondary: #ffffff;
+            --color-text-primary: #212121;
+            --color-text-secondary: #757575;
+            --color-border: #e0e0e0;
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+            --radius-base: 6px;
+            --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        /* ============================================
+           RESET & BASE STYLES
+           ============================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background-color: var(--color-bg-primary);
+            color: var(--color-text-primary);
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        /* ============================================
+           LAYOUT COMPONENTS
+           ============================================ */
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background-color: var(--color-bg-primary);
+        }
+
+        header {
+            background-color: var(--color-primary);
+            color: white;
+            padding: var(--spacing-md) var(--spacing-lg);
+            text-align: center;
+            box-shadow: var(--shadow-md);
+        }
+
+        header h1 {
+            font-size: 24px;
+            margin-bottom: 0;
+        }
+
+        .tabs {
+            display: flex;
+            background-color: var(--color-bg-secondary);
+            border-bottom: 2px solid var(--color-border);
+            padding: 0 var(--spacing-lg);
+            gap: var(--spacing-md);
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: var(--spacing-md);
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--color-text-secondary);
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .tab-button.active {
+            color: var(--color-primary);
+            border-bottom-color: var(--color-primary);
+        }
+
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: var(--spacing-lg);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* ============================================
+           FORMS & INPUTS
+           ============================================ */
+        .form-group {
+            margin-bottom: var(--spacing-md);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: var(--color-text-primary);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input[type="text"],
+        input[type="date"],
+        textarea,
+        select {
+            width: 100%;
+            padding: var(--spacing-sm) var(--spacing-md);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-base);
+            font-family: inherit;
+            font-size: 14px;
+            background-color: var(--color-bg-secondary);
+            color: var(--color-text-primary);
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="date"]:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+            font-family: inherit;
+        }
+
+        /* ============================================
+           BUTTONS
+           ============================================ */
+        .btn {
+            padding: var(--spacing-sm) var(--spacing-md);
+            border: none;
+            border-radius: var(--radius-base);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background-color: var(--color-primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--color-primary-hover);
+        }
+
+        .btn-success {
+            background-color: var(--color-success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #45a049;
+        }
+
+        .btn-danger {
+            background-color: var(--color-danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #da190b;
+        }
+
+        .btn-warning {
+            background-color: var(--color-warning);
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background-color: #e68900;
+        }
+
+        .btn-secondary {
+            background-color: var(--color-text-secondary);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #616161;
+        }
+
+        .btn-small {
+            padding: 4px 12px;
+            font-size: 12px;
+        }
+
+        .btn-full-width {
+            width: 100%;
+        }
+
+        /* ============================================
+           HABIT SECTION
+           ============================================ */
+        .habit-add-form {
+            background-color: var(--color-bg-secondary);
+            padding: var(--spacing-lg);
+            border-radius: var(--radius-base);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .habits-list {
+            display: grid;
+            gap: var(--spacing-md);
+        }
+
+        .habit-card {
+            background-color: var(--color-bg-secondary);
+            padding: var(--spacing-md);
+            border-radius: var(--radius-base);
+            box-shadow: var(--shadow-sm);
+            border-left: 4px solid var(--color-primary);
+        }
+
+        .habit-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: var(--spacing-md);
+            gap: var(--spacing-md);
+        }
+
+        .habit-info h3 {
+            font-size: 16px;
+            margin-bottom: 4px;
+            color: var(--color-text-primary);
+        }
+
+        .habit-streak {
+            font-size: 12px;
+            color: var(--color-warning);
+            font-weight: 600;
+        }
+
+        .habit-note {
+            font-size: 12px;
+            color: var(--color-text-secondary);
+            margin-top: 4px;
+            font-style: italic;
+        }
+
+        .habit-actions {
+            display: flex;
+            gap: var(--spacing-sm);
+            justify-content: flex-end;
+            margin-top: var(--spacing-md);
+            padding-top: var(--spacing-md);
+            border-top: 1px solid var(--color-border);
+        }
+
+        .habit-checkoff {
+            display: flex;
+            gap: var(--spacing-md);
+            align-items: center;
+            margin-top: var(--spacing-md);
+        }
+
+        .checkbox-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid var(--color-primary);
+            background-color: white;
+            cursor: pointer;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .checkbox-btn.completed {
+            background-color: var(--color-success);
+            border-color: var(--color-success);
+            color: white;
+        }
+
+        .checkbox-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .checkoff-info {
+            flex: 1;
+        }
+
+        .checkoff-date {
+            font-size: 12px;
+            color: var(--color-text-secondary);
+        }
+
+        /* ============================================
+           CALENDAR SECTION
+           ============================================ */
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-lg);
+            gap: var(--spacing-md);
+        }
+
+        .calendar-header h2 {
+            font-size: 20px;
+            margin: 0;
+        }
+
+        .calendar-nav {
+            display: flex;
+            gap: var(--spacing-sm);
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            margin-bottom: var(--spacing-lg);
+            background-color: var(--color-bg-secondary);
+            padding: var(--spacing-md);
+            border-radius: var(--radius-base);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .calendar-weekday {
+            text-align: center;
+            font-weight: 600;
+            color: var(--color-text-secondary);
+            font-size: 12px;
+            padding: var(--spacing-sm);
+            text-transform: uppercase;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-base);
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            background-color: white;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .calendar-day:hover {
+            background-color: var(--color-bg-primary);
+        }
+
+        .calendar-day.other-month {
+            color: var(--color-text-secondary);
+            background-color: #fafafa;
+        }
+
+        .calendar-day.today {
+            background-color: var(--color-primary);
+            color: white;
+            font-weight: bold;
+            border-color: var(--color-primary);
+        }
+
+        .calendar-day.event {
+            background-color: var(--color-warning);
+            color: white;
+            border-color: var(--color-warning);
+        }
+
+        .calendar-day.selected {
+            border: 2px solid var(--color-primary);
+            box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
+        }
+
+        .calendar-event-list {
+            background-color: var(--color-bg-secondary);
+            padding: var(--spacing-md);
+            border-radius: var(--radius-base);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .calendar-event-list h3 {
+            margin-bottom: var(--spacing-md);
+            color: var(--color-primary);
+        }
+
+        .event-item {
+            padding: var(--spacing-md);
+            background-color: var(--color-bg-primary);
+            border-left: 3px solid var(--color-warning);
+            border-radius: var(--radius-base);
+            margin-bottom: var(--spacing-sm);
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            gap: var(--spacing-md);
+        }
+
+        .event-content {
+            flex: 1;
+        }
+
+        .event-title {
+            font-weight: 600;
+            color: var(--color-text-primary);
+            margin-bottom: 4px;
+        }
+
+        .event-note {
+            font-size: 12px;
+            color: var(--color-text-secondary);
+        }
+
+        .event-actions {
+            display: flex;
+            gap: 4px;
+        }
+
+        /* ============================================
+           EMPTY STATE & MESSAGES
+           ============================================ */
+        .empty-state {
+            text-align: center;
+            padding: var(--spacing-lg);
+            color: var(--color-text-secondary);
+        }
+
+        .empty-state p {
+            margin-bottom: var(--spacing-md);
+        }
+
+        .success-message {
+            background-color: rgba(76, 175, 80, 0.1);
+            border-left: 4px solid var(--color-success);
+            color: var(--color-success);
+            padding: var(--spacing-md);
+            border-radius: var(--radius-base);
+            margin-bottom: var(--spacing-md);
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        /* ============================================
+           RESPONSIVE DESIGN
+           ============================================ */
+        @media (max-width: 768px) {
+            .container {
+                height: auto;
+                min-height: 100vh;
+            }
+
+            header h1 {
+                font-size: 18px;
+            }
+
+            .tabs {
+                padding: 0 var(--spacing-md);
+                gap: 0;
+            }
+
+            .tab-button {
+                padding: var(--spacing-sm) var(--spacing-md);
+                font-size: 12px;
+            }
+
+            .main-content {
+                padding: var(--spacing-md);
+            }
+
+            .habit-header {
+                flex-direction: column;
+            }
+
+            .habit-actions {
+                flex-wrap: wrap;
+            }
+
+            .calendar-grid {
+                padding: var(--spacing-sm);
+            }
+
+            .checkbox-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 16px;
+            }
+
+            .calendar-day {
+                font-size: 11px;
+                padding: 2px;
+            }
+
+            .calendar-weekday {
+                padding: 4px 0;
+                font-size: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            header {
+                padding: var(--spacing-sm) var(--spacing-md);
+            }
+
+            header h1 {
+                font-size: 16px;
+            }
+
+            .main-content {
+                padding: var(--spacing-sm);
+            }
+
+            .form-group {
+                margin-bottom: var(--spacing-sm);
+            }
+
+            .btn {
+                padding: 8px 12px;
+                font-size: 12px;
+            }
+
+            .habit-card {
+                padding: var(--spacing-sm);
+            }
+
+            .checkbox-btn {
+                width: 36px;
+                height: 36px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER -->
+        <header>
+            <h1>📋 Habit Tracker + Calendar</h1>
+        </header>
+
+        <!-- TABS NAVIGATION -->
+        <div class="tabs">
+            <button class="tab-button active" data-tab="habits">
+                Habits
+            </button>
+            <button class="tab-button" data-tab="calendar">
+                Calendar
+            </button>
+        </div>
+
+        <!-- MAIN CONTENT -->
+        <div class="main-content">
+            <!-- ===== HABITS TAB ===== -->
+            <div id="habits" class="tab-content active">
+                <!-- Success Message -->
+                <div class="success-message" id="successMessage"></div>
+
+                <!-- Add New Habit Form -->
+                <div class="habit-add-form">
+                    <h2 style="margin-bottom: var(--spacing-md); font-size: 18px;">Create a New Habit</h2>
+
+                    <div class="form-group">
+                        <label for="habitName">Habit Name *</label>
+                        <input
+                            type="text"
+                            id="habitName"
+                            placeholder="e.g., Morning Exercise, Read a Book, Drink Water"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="habitNote">Notes (optional)</label>
+                        <textarea
+                            id="habitNote"
+                            placeholder="Add motivation, tips, or reminders for this habit..."
+                        ></textarea>
+                    </div>
+
+                    <button class="btn btn-primary btn-full-width" id="addHabitBtn">
+                        ➕ Add Habit
+                    </button>
+                </div>
+
+                <!-- Habits List -->
+                <div class="habits-list" id="habitsList"></div>
+
+                <!-- Empty State -->
+                <div class="empty-state" id="habitsEmpty" style="display: none;">
+                    <p>No habits yet. Create your first habit above!</p>
+                </div>
+            </div>
+
+            <!-- ===== CALENDAR TAB ===== -->
+            <div id="calendar" class="tab-content">
+                <!-- Calendar Navigation -->
+                <div class="calendar-header">
+                    <h2 id="calendarMonth">January 2026</h2>
+                    <div class="calendar-nav">
+                        <button class="btn btn-secondary btn-small" id="prevMonth">← Prev</button>
+                        <button class="btn btn-secondary btn-small" id="todayBtn">Today</button>
+                        <button class="btn btn-secondary btn-small" id="nextMonth">Next →</button>
+                    </div>
+                </div>
+
+                <!-- Calendar Grid -->
+                <div class="calendar-grid" id="calendarGrid"></div>
+
+                <!-- Add Event Section -->
+                <div style="background-color: var(--color-bg-secondary); padding: var(--spacing-lg); border-radius: var(--radius-base); box-shadow: var(--shadow-sm); margin-bottom: var(--spacing-lg);">
+                    <h3 style="margin-bottom: var(--spacing-md); font-size: 16px;">📌 Add Event/Note for Selected Date</h3>
+
+                    <div class="form-group">
+                        <label>Selected Date:</label>
+                        <input type="text" id="selectedDateDisplay" readonly style="background-color: #f5f5f5;">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="eventTitle">Event Title *</label>
+                        <input
+                            type="text"
+                            id="eventTitle"
+                            placeholder="e.g., Doctor Appointment, Birthday, Important Meeting"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="eventNote">Notes (optional)</label>
+                        <textarea
+                            id="eventNote"
+                            placeholder="Add details about this event..."
+                        ></textarea>
+                    </div>
+
+                    <button class="btn btn-primary btn-full-width" id="addEventBtn">
+                        ➕ Add Event
+                    </button>
+                </div>
+
+                <!-- Events List -->
+                <div class="calendar-event-list" id="calendarEventList">
+                    <h3>Events on Selected Date</h3>
+                    <div id="eventsList"></div>
+                    <div class="empty-state" id="eventsEmpty" style="display: none;">
+                        <p>No events on this date. Click a date to select it, then add an event.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/habit-tracker/service-worker.js')
+                .catch(err => console.log('Service Worker registration failed:', err));
+        }
+
+        // ============================================
+        // DATA MANAGEMENT - localStorage Handlers
+        // ============================================
+
+        function loadHabits() {
+            const stored = localStorage.getItem('habits');
+            return stored ? JSON.parse(stored) : [];
+        }
+
+        function saveHabits(habits) {
+            localStorage.setItem('habits', JSON.stringify(habits));
+        }
+
+        function loadEvents() {
+            const stored = localStorage.getItem('calendarEvents');
+            return stored ? JSON.parse(stored) : [];
+        }
+
+        function saveEvents(events) {
+            localStorage.setItem('calendarEvents', JSON.stringify(events));
+        }
+
+        // ============================================
+        // UTILITY FUNCTIONS
+        // ============================================
+
+        function showMessage(message) {
+            const msg = document.getElementById('successMessage');
+            msg.textContent = message;
+            msg.classList.add('show');
+            setTimeout(() => msg.classList.remove('show'), 3000);
+        }
+
+        function calculateStreak(habitId) {
+            const habit = habits.find(h => h.id === habitId);
+            if (!habit || !habit.completedDates) return 0;
+
+            let streak = 0;
+            const today = new Date();
+            let currentDate = new Date(today);
+            currentDate.setHours(0, 0, 0, 0);
+
+            while (true) {
+                const dateString = currentDate.toISOString().split('T')[0];
+                if (habit.completedDates.includes(dateString)) {
+                    streak++;
+                    currentDate.setDate(currentDate.getDate() - 1);
+                } else {
+                    break;
+                }
+            }
+
+            return streak;
+        }
+
+        function formatDate(date) {
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            return date.toLocaleDateString('en-US', options);
+        }
+
+        function getDateString(date) {
+            return date.toISOString().split('T')[0];
+        }
+
+        // ============================================
+        // HABIT MANAGEMENT
+        // ============================================
+
+        let habits = loadHabits();
+
+        function addHabit() {
+            const name = document.getElementById('habitName').value.trim();
+            const note = document.getElementById('habitNote').value.trim();
+
+            if (!name) {
+                showMessage('⚠️ Please enter a habit name');
+                return;
+            }
+
+            const newHabit = {
+                id: Date.now(),
+                name: name,
+                note: note,
+                createdDate: getDateString(new Date()),
+                completedDates: []
+            };
+
+            habits.push(newHabit);
+            saveHabits(habits);
+
+            document.getElementById('habitName').value = '';
+            document.getElementById('habitNote').value = '';
+
+            showMessage('✅ Habit added successfully!');
+            renderHabits();
+        }
+
+        function deleteHabit(habitId) {
+            if (confirm('Are you sure you want to delete this habit?')) {
+                habits = habits.filter(h => h.id !== habitId);
+                saveHabits(habits);
+                showMessage('🗑️ Habit deleted');
+                renderHabits();
+            }
+        }
+
+        function toggleHabitCompletion(habitId) {
+            const today = getDateString(new Date());
+            const habit = habits.find(h => h.id === habitId);
+
+            if (!habit) return;
+
+            const index = habit.completedDates.indexOf(today);
+            if (index > -1) {
+                habit.completedDates.splice(index, 1);
+            } else {
+                habit.completedDates.push(today);
+            }
+
+            saveHabits(habits);
+            renderHabits();
+        }
+
+        function renderHabits() {
+            const habitsList = document.getElementById('habitsList');
+            const emptyState = document.getElementById('habitsEmpty');
+
+            habitsList.innerHTML = '';
+
+            if (habits.length === 0) {
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+
+            habits.forEach(habit => {
+                const streak = calculateStreak(habit.id);
+                const today = getDateString(new Date());
+                const isCompletedToday = habit.completedDates.includes(today);
+
+                const card = document.createElement('div');
+                card.className = 'habit-card';
+                card.innerHTML = `
+                    <div class="habit-header">
+                        <div class="habit-info">
+                            <h3>${habit.name}</h3>
+                            <div class="habit-streak">🔥 Streak: ${streak} days</div>
+                            ${habit.note ? `<div class="habit-note">${habit.note}</div>` : ''}
+                        </div>
+                    </div>
+
+                    <div class="habit-checkoff">
+                        <button 
+                            class="checkbox-btn ${isCompletedToday ? 'completed' : ''}"
+                            onclick="toggleHabitCompletion(${habit.id})"
+                            title="Mark as completed today"
+                        >
+                            ${isCompletedToday ? '✓' : ''}
+                        </button>
+                        <div class="checkoff-info">
+                            <p style="margin: 0; font-weight: 500;">
+                                ${isCompletedToday ? '✅ Completed today' : '⭕ Not completed today'}
+                            </p>
+                            <div class="checkoff-date">${formatDate(new Date())}</div>
+                        </div>
+                    </div>
+
+                    <div class="habit-actions">
+                        <button 
+                            class="btn btn-danger btn-small"
+                            onclick="deleteHabit(${habit.id})"
+                        >
+                            Delete
+                        </button>
+                    </div>
+                `;
+
+                habitsList.appendChild(card);
+            });
+        }
+
+        // ============================================
+        // CALENDAR MANAGEMENT
+        // ============================================
+
+        let currentDate = new Date();
+        let selectedDate = new Date();
+        let events = loadEvents();
+
+        function generateCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const daysInPrevMonth = new Date(year, month, 0).getDate();
+
+            const monthNames = [
+                'January', 'February', 'March', 'April', 'May', 'June',
+                'July', 'August', 'September', 'October', 'November', 'December'
+            ];
+            document.getElementById('calendarMonth').textContent = 
+                `${monthNames[month]} ${year}`;
+
+            const grid = document.getElementById('calendarGrid');
+            grid.innerHTML = '';
+
+            const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            weekdays.forEach(day => {
+                const header = document.createElement('div');
+                header.className = 'calendar-weekday';
+                header.textContent = day;
+                grid.appendChild(header);
+            });
+
+            for (let i = firstDay - 1; i >= 0; i--) {
+                const day = daysInPrevMonth - i;
+                const dayEl = createDayElement(day, month - 1, year, true);
+                grid.appendChild(dayEl);
+            }
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayEl = createDayElement(day, month, year, false);
+                grid.appendChild(dayEl);
+            }
+
+            const totalCells = grid.children.length - 7;
+            const remainingCells = 42 - totalCells;
+            for (let day = 1; day <= remainingCells; day++) {
+                const dayEl = createDayElement(day, month + 1, year, true);
+                grid.appendChild(dayEl);
+            }
+        }
+
+        function createDayElement(day, month, year, otherMonth) {
+            const dayEl = document.createElement('div');
+            dayEl.className = 'calendar-day';
+            dayEl.textContent = day;
+
+            if (otherMonth) {
+                if (month < 0) {
+                    month = 11;
+                    year--;
+                } else if (month > 11) {
+                    month = 0;
+                    year++;
+                }
+            }
+
+            const date = new Date(year, month, day);
+            const dateString = getDateString(date);
+
+            const today = new Date();
+            if (dateString === getDateString(today)) {
+                dayEl.classList.add('today');
+            }
+
+            if (otherMonth) {
+                dayEl.classList.add('other-month');
+            }
+
+            if (events.some(e => e.date === dateString)) {
+                dayEl.classList.add('event');
+            }
+
+            if (dateString === getDateString(selectedDate)) {
+                dayEl.classList.add('selected');
+            }
+
+            dayEl.addEventListener('click', () => selectDate(date));
+
+            return dayEl;
+        }
+
+        function selectDate(date) {
+            selectedDate = date;
+            document.getElementById('selectedDateDisplay').value = formatDate(date);
+            generateCalendar();
+            renderCalendarEvents();
+        }
+
+        function addCalendarEvent() {
+            const title = document.getElementById('eventTitle').value.trim();
+            const note = document.getElementById('eventNote').value.trim();
+            const date = getDateString(selectedDate);
+
+            if (!title) {
+                showMessage('⚠️ Please enter an event title');
+                return;
+            }
+
+            const newEvent = {
+                id: Date.now(),
+                date: date,
+                title: title,
+                note: note
+            };
+
+            events.push(newEvent);
+            saveEvents(events);
+
+            document.getElementById('eventTitle').value = '';
+            document.getElementById('eventNote').value = '';
+
+            showMessage('✅ Event added successfully!');
+            generateCalendar();
+            renderCalendarEvents();
+        }
+
+        function deleteCalendarEvent(eventId) {
+            if (confirm('Delete this event?')) {
+                events = events.filter(e => e.id !== eventId);
+                saveEvents(events);
+                showMessage('🗑️ Event deleted');
+                generateCalendar();
+                renderCalendarEvents();
+            }
+        }
+
+        function renderCalendarEvents() {
+            const eventsList = document.getElementById('eventsList');
+            const emptyState = document.getElementById('eventsEmpty');
+            const dateString = getDateString(selectedDate);
+
+            const dayEvents = events.filter(e => e.date === dateString);
+
+            eventsList.innerHTML = '';
+
+            if (dayEvents.length === 0) {
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+
+            dayEvents.forEach(event => {
+                const item = document.createElement('div');
+                item.className = 'event-item';
+                item.innerHTML = `
+                    <div class="event-content">
+                        <div class="event-title">${event.title}</div>
+                        ${event.note ? `<div class="event-note">${event.note}</div>` : ''}
+                    </div>
+                    <div class="event-actions">
+                        <button 
+                            class="btn btn-danger btn-small"
+                            onclick="deleteCalendarEvent(${event.id})"
+                        >
+                            ✕
+                        </button>
+                    </div>
+                `;
+
+                eventsList.appendChild(item);
+            });
+        }
+
+        // ============================================
+        // TABS MANAGEMENT
+        // ============================================
+
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.addEventListener('click', () => {
+                document.querySelectorAll('.tab-button').forEach(b => 
+                    b.classList.remove('active')
+                );
+                document.querySelectorAll('.tab-content').forEach(c => 
+                    c.classList.remove('active')
+                );
+
+                button.classList.add('active');
+                const tabName = button.getAttribute('data-tab');
+                document.getElementById(tabName).classList.add('active');
+            });
+        });
+
+        // ============================================
+        // EVENT LISTENERS
+        // ============================================
+
+        document.getElementById('addHabitBtn').addEventListener('click', addHabit);
+
+        document.getElementById('habitName').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addHabit();
+        });
+
+        document.getElementById('prevMonth').addEventListener('click', () => {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            generateCalendar();
+        });
+
+        document.getElementById('nextMonth').addEventListener('click', () => {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            generateCalendar();
+        });
+
+        document.getElementById('todayBtn').addEventListener('click', () => {
+            currentDate = new Date();
+            selectedDate = new Date();
+            document.getElementById('selectedDateDisplay').value = formatDate(selectedDate);
+            generateCalendar();
+            renderCalendarEvents();
+        });
+
+        document.getElementById('addEventBtn').addEventListener('click', addCalendarEvent);
+
+        document.getElementById('eventTitle').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addCalendarEvent();
+        });
+
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+
+        function init() {
+            selectedDate = new Date();
+            document.getElementById('selectedDateDisplay').value = formatDate(selectedDate);
+
+            generateCalendar();
+            renderHabits();
+            renderCalendarEvents();
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    </script>
+</body>
+</html>

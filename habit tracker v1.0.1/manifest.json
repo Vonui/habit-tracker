@@ -1,0 +1,49 @@
+{
+  "name": "Habit Tracker & Calendar App",
+  "short_name": "HabitTrack",
+  "description": "Track daily habits and manage your calendar with streaks and insights.",
+  "start_url": "/habit-tracker/",
+  "scope": "/habit-tracker/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#ffffff",
+  "theme_color": "#2196F3",
+  "id": "/habit-tracker/",
+  "icons": [
+    {
+      "src": "/habit-tracker/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/habit-tracker/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity"],
+  "screenshots": [
+    {
+      "src": "/habit-tracker/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Add Habit",
+      "short_name": "New Habit",
+      "description": "Quickly add a new habit",
+      "url": "/habit-tracker/?tab=habits",
+      "icons": [
+        {
+          "src": "/habit-tracker/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
+}
